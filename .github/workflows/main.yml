@@ -1,0 +1,31 @@
+name: Convert Word to Markdown
+
+on:
+  push:
+    paths:
+      - '*.docx'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Pandoc
+        run: sudo apt-get install -y pandoc
+
+      - name: Convert Word Files to Markdown
+        run: |
+          for file in *.docx; do
+            [ -e "$file" ] || continue
+            pandoc "$file" -f docx -t markdown -o "${file%.docx}.md"
+          done
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add *.md
+          git commit -m "Auto-converted Word files to Markdown"
+          git push
